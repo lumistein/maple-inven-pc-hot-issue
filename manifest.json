@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "메이플 인벤 지금 뜨는 글",
+  "description": "메이플 인벤 자유게시판 PC 버전에서 '지금 뜨는 글'을 표시합니다.",
+  "version": "1.1.0",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://m.inven.co.kr/*",
+    "https://www.inven.co.kr/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.inven.co.kr/board/maple/5974*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
