@@ -75,34 +75,92 @@ async function fetchHotPosts() {
 // 위젯 렌더링
 // ──────────────────────────────────────────────
 
-function createLoadingWidget() {
+function createWidgetBase() {
   const div = document.createElement('div');
   div.id = 'inven-hot-widget';
   div.innerHTML = `
     <div class="hot-header">
-      <div class="hot-title">
-        <span class="hot-icon">🔥</span>
-        <span>지금 뜨는 글</span>
-        <span class="hot-badge">LIVE</span>
-      </div>
-    </div>
-    <div class="hot-loading">
-      <div class="loading-dot"></div>
-      <div class="loading-dot"></div>
-      <div class="loading-dot"></div>
+      <div class="hot-title"></div>
+      <div class="hot-buttons"></div>
     </div>
   `;
   return div;
 }
 
-function renderPostList(posts, updatedAt) {
-  const rankSymbols = ['①', '②', '③', '④', '⑤'];
+function updateWidgetState(widget, collapsed) {
+  isWidgetCollapsed = collapsed;
+  const header = widget.querySelector('.hot-header');
+  const titleContainer = header.querySelector('.hot-title');
+  const buttonsContainer = header.querySelector('.hot-buttons');
 
+  // 기존 헤더 버튼 및 타이틀 비우기
+  titleContainer.innerHTML = '';
+  buttonsContainer.innerHTML = '';
+
+  if (collapsed) {
+    widget.classList.add('collapsed');
+
+    // 리스트 및 로딩 영역 등 모두 제거
+    const toRemove = widget.querySelectorAll('.hot-loading, .hot-list, .hot-footer, .hot-error');
+    toRemove.forEach((el) => el.remove());
+
+    // 타이틀: 비활성화 상태 표시
+    titleContainer.innerHTML = `
+      <span class="hot-icon">🔥</span>
+      <span>지금 뜨는 글 (비활성화됨)</span>
+    `;
+
+    // 활성화하기 버튼 추가
+    const activateBtn = document.createElement('button');
+    activateBtn.type = 'button';
+    activateBtn.className = 'hot-btn';
+    activateBtn.textContent = '활성화하기';
+    activateBtn.addEventListener('click', () => {
+      chrome.storage.local.set({ hot_widget_disabled: false }, () => {
+        updateWidgetState(widget, false);
+        loadAndRender(widget);
+      });
+    });
+    buttonsContainer.appendChild(activateBtn);
+  } else {
+    widget.classList.remove('collapsed');
+
+    // 타이틀: 활성화 상태 표시
+    titleContainer.innerHTML = `
+      <span class="hot-icon">🔥</span>
+      <span>지금 뜨는 글</span>
+      <span class="hot-badge">LIVE</span>
+    `;
+
+    // '활성화 할때까지 보지 않기' 버튼 추가
+    const deactivateBtn = document.createElement('button');
+    deactivateBtn.type = 'button';
+    deactivateBtn.className = 'hot-btn';
+    deactivateBtn.textContent = '활성화 할때까지 보지 않기';
+    deactivateBtn.addEventListener('click', () => {
+      chrome.storage.local.set({ hot_widget_disabled: true }, () => {
+        updateWidgetState(widget, true);
+      });
+    });
+    buttonsContainer.appendChild(deactivateBtn);
+
+    // 새로고침 버튼 추가
+    const refreshBtn = document.createElement('button');
+    refreshBtn.type = 'button';
+    refreshBtn.className = 'hot-btn hot-refresh';
+    refreshBtn.title = '새로고침';
+    refreshBtn.innerHTML = `<span class="refresh-icon">↻</span> 새로고침`;
+    refreshBtn.addEventListener('click', () => loadAndRender(widget, true));
+    buttonsContainer.appendChild(refreshBtn);
+  }
+}
+
+function renderPostList(posts, updatedAt) {
   const itemsHtml = posts
     .map(
-      (post, i) => `
+      (post) => `
       <li class="hot-item">
-        <span class="rank">${rankSymbols[i] || i + 1}</span>
+        <span class="hot-bullet">•</span>
         ${post.category ? `<span class="cate-badge">${escapeHtml(post.category)}</span>` : ''}
         <a class="post-link" href="${escapeHtml(post.url)}" title="${escapeHtml(post.title)}">
           ${escapeHtml(post.title)}
@@ -125,6 +183,19 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+function getCachedPosts() {
+  try {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        return data;
+      }
+    }
+  } catch (_) {}
+  return null;
 }
 
 /**
@@ -171,6 +242,8 @@ function showError(widget, message) {
 // ──────────────────────────────────────────────
 // 메인 로직
 // ──────────────────────────────────────────────
+
+let isWidgetCollapsed = false;
 
 /**
  * PC 게시판 페이지에서 위젯 삽입 기준 요소를 반환
@@ -219,22 +292,10 @@ async function init() {
 
   const insertTarget = findInsertTarget();
   if (!insertTarget) {
-    console.warn('[인벤 핫글] 삽입 위치를 찾지 못했습니다.');
     return;
   }
 
-  // 로딩 위젯 먼저 삽입
-  const widget = createLoadingWidget();
-
-  // 새로고침 버튼 추가 (헤더에)
-  const header = widget.querySelector('.hot-header');
-  const refreshBtn = document.createElement('button');
-  refreshBtn.type = 'button'; // form submit 방지 (기본값이 submit이라 탭 새로고침됨)
-  refreshBtn.className = 'hot-refresh';
-  refreshBtn.title = '새로고침';
-  refreshBtn.innerHTML = `<span class="refresh-icon">↻</span> 새로고침`;
-  refreshBtn.addEventListener('click', () => loadAndRender(widget));
-  header.appendChild(refreshBtn);
+  const widget = createWidgetBase();
 
   // div.board-list 바로 앞에 삽입 (가장 확실한 위치)
   // 그 외에는 부모의 첫 번째 자식으로
@@ -245,16 +306,35 @@ async function init() {
     insertTarget.insertBefore(widget, insertTarget.firstChild);
   }
 
-  // 데이터 로드
-  await loadAndRender(widget);
+  // 저장된 비활성화 상태 확인 후 렌더링
+  chrome.storage.local.get(['hot_widget_disabled'], async function (result) {
+    const disabled = !!result.hot_widget_disabled;
+    updateWidgetState(widget, disabled);
+    if (!disabled) {
+      await loadAndRender(widget);
+    }
+  });
 }
 
-async function loadAndRender(widget) {
+async function loadAndRender(widget, forceRefresh = false) {
+  if (isWidgetCollapsed) return;
+
   // 새로고침 시 스피너
   const refreshBtn = widget.querySelector('.hot-refresh');
   if (refreshBtn) {
     refreshBtn.classList.add('spinning');
     refreshBtn.querySelector('.refresh-icon').textContent = '↻';
+  }
+
+  if (forceRefresh) {
+    sessionStorage.removeItem(CACHE_KEY);
+  }
+
+  // 캐시가 유효하면 로딩 표시 없이 바로 렌더링 (깜빡임 방지)
+  const cachedPosts = getCachedPosts();
+  if (cachedPosts) {
+    updateWidgetContent(widget, cachedPosts);
+    return;
   }
 
   // 기존 콘텐츠 제거하고 로딩 표시
@@ -273,9 +353,6 @@ async function loadAndRender(widget) {
   }
 
   try {
-    // 새로고침 시 캐시 무효화
-    sessionStorage.removeItem(CACHE_KEY);
-
     const posts = await fetchHotPosts();
     const loading = widget.querySelector('.hot-loading');
     if (loading) loading.remove();
@@ -294,9 +371,30 @@ async function loadAndRender(widget) {
   }
 }
 
-// DOM 준비 후 실행
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
+// MutationObserver를 사용하여 document_start 시점에도 최대한 빠르게 타겟 요소를 탐색해 삽입
+function startWidget() {
+  if (findInsertTarget()) {
+    init();
+    return;
+  }
+
+  const observer = new MutationObserver((mutations, obs) => {
+    if (findInsertTarget()) {
+      obs.disconnect();
+      init();
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
+
+  // Fallback: DOMContentLoaded 시점에도 실행할 수 있도록 보장
+  document.addEventListener('DOMContentLoaded', () => {
+    observer.disconnect();
+    init();
+  });
 }
+
+startWidget();

@@ -1,90 +1,67 @@
-/* 지금 뜨는 글 위젯 스타일 */
+/* 지금 뜨는 글 위젯 스타일 (메이플 인벤 스타일과 조화롭게 커스텀) */
 #inven-hot-widget {
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, Roboto, "Noto Sans KR", "Segoe UI", "Malgun Gothic", sans-serif;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border: 1px solid rgba(255, 183, 0, 0.3);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #d5d5d5;
+  border-radius: 6px;
   padding: 0;
   margin: 0 0 14px 0;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 183, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   position: relative;
-}
-
-#inven-hot-widget::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #ffb700, #ff6b35, #ffb700);
-  background-size: 200% 100%;
-  animation: shimmer 2s linear infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 #inven-hot-widget .hot-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 10px;
-  background: rgba(255, 183, 0, 0.05);
-  border-bottom: 1px solid rgba(255, 183, 0, 0.15);
+  padding: 10px 14px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 #inven-hot-widget .hot-header .hot-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 13px;
   font-weight: 700;
-  color: #ffb700;
+  color: #c2442b; /* 인벤 메이플 테마 오렌지레드 컬러 */
   letter-spacing: 0.3px;
 }
 
 #inven-hot-widget .hot-header .hot-icon {
-  font-size: 16px;
-  animation: flicker 1.5s ease-in-out infinite alternate;
-}
-
-@keyframes flicker {
-  0% { transform: scale(1) rotate(-5deg); }
-  100% { transform: scale(1.15) rotate(5deg); }
+  font-size: 14px;
 }
 
 #inven-hot-widget .hot-header .hot-badge {
-  font-size: 10px;
-  color: rgba(255, 183, 0, 0.7);
-  background: rgba(255, 183, 0, 0.1);
-  border: 1px solid rgba(255, 183, 0, 0.2);
-  border-radius: 4px;
-  padding: 2px 7px;
-  letter-spacing: 0.2px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #ffffff;
+  background: #c2442b;
+  border-radius: 3px;
+  padding: 1px 4px;
+  letter-spacing: 0.5px;
 }
 
-#inven-hot-widget .hot-header .hot-refresh {
+#inven-hot-widget .hot-header .hot-btn {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: #666666;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: transparent;
-  transition: all 0.2s ease;
-  display: flex;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #cccccc;
+  background: #ffffff;
+  transition: all 0.1s ease;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-#inven-hot-widget .hot-header .hot-refresh:hover {
-  color: rgba(255, 255, 255, 0.8);
-  border-color: rgba(255, 183, 0, 0.4);
-  background: rgba(255, 183, 0, 0.08);
+#inven-hot-widget .hot-header .hot-btn:hover {
+  color: #333333;
+  border-color: #bbbbbb;
+  background: #fafafa;
 }
 
 #inven-hot-widget .hot-refresh.spinning .refresh-icon {
@@ -99,81 +76,67 @@
 #inven-hot-widget .hot-list {
   list-style: none;
   margin: 0;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
 #inven-hot-widget .hot-list .hot-item {
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 6px 14px;
   gap: 8px;
-  transition: background 0.2s ease;
+  transition: background 0.1s ease;
   position: relative;
 }
 
 #inven-hot-widget .hot-list .hot-item:hover {
-  background: rgba(255, 183, 0, 0.07);
+  background: #fafafa;
 }
 
-#inven-hot-widget .hot-list .hot-item .rank {
+#inven-hot-widget .hot-list .hot-item .hot-bullet {
+  color: #c2442b;
   font-size: 12px;
-  font-weight: 800;
-  min-width: 18px;
-  text-align: center;
-  color: rgba(255, 183, 0, 0.5);
+  margin-right: 2px;
   flex-shrink: 0;
-}
-
-#inven-hot-widget .hot-list .hot-item:nth-child(1) .rank {
-  color: #ffb700;
-}
-
-#inven-hot-widget .hot-list .hot-item:nth-child(2) .rank {
-  color: #c0c0c0;
-}
-
-#inven-hot-widget .hot-list .hot-item:nth-child(3) .rank {
-  color: #cd7f32;
 }
 
 #inven-hot-widget .hot-list .hot-item .cate-badge {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #666666;
+  background: #f2f2f2;
+  border: 1px solid #e0e0e0;
   border-radius: 3px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   flex-shrink: 0;
   white-space: nowrap;
 }
 
 #inven-hot-widget .hot-list .hot-item .post-link {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.88);
+  color: #333333;
   text-decoration: none;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s ease;
+  transition: color 0.1s ease;
 }
 
 #inven-hot-widget .hot-list .hot-item .post-link:hover {
-  color: #ffb700;
-  text-decoration: none;
+  color: #c2442b;
+  text-decoration: underline;
 }
 
 #inven-hot-widget .hot-list .hot-item .comment-count {
   font-size: 11px;
-  color: #ff6b6b;
+  color: #e03e2d;
   font-weight: 600;
   flex-shrink: 0;
   white-space: nowrap;
 }
 
 #inven-hot-widget .hot-footer {
-  padding: 8px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6px 14px;
+  border-top: 1px solid #e5e5e5;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -181,13 +144,13 @@
 
 #inven-hot-widget .hot-footer .update-time {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.25);
+  color: #999999;
 }
 
 #inven-hot-widget .hot-loading {
-  padding: 20px 16px;
+  padding: 14px 14px;
   text-align: center;
-  color: rgba(255, 255, 255, 0.3);
+  color: #999999;
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -198,7 +161,7 @@
 #inven-hot-widget .loading-dot {
   width: 6px;
   height: 6px;
-  background: rgba(255, 183, 0, 0.6);
+  background: #c2442b;
   border-radius: 50%;
   animation: bounce 1.2s ease-in-out infinite;
 }
@@ -212,39 +175,32 @@
 }
 
 #inven-hot-widget .hot-error {
-  padding: 14px 16px;
+  padding: 12px 14px;
   text-align: center;
-  color: rgba(255, 100, 100, 0.7);
+  color: #d9534f;
   font-size: 12px;
 }
 
-/* 위젯 슬라이드인 애니메이션 */
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* 접힌(비활성화) 상태 스타일 */
+#inven-hot-widget.collapsed {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-color: #d5d5d5;
 }
 
-#inven-hot-widget {
-  animation: slideInDown 0.4s ease forwards;
+#inven-hot-widget.collapsed .hot-header {
+  border-bottom: none;
+  padding: 8px 14px;
 }
 
-/* 아이템 순차 등장 애니메이션 */
-#inven-hot-widget .hot-item {
-  opacity: 0;
-  animation: fadeInItem 0.3s ease forwards;
+#inven-hot-widget.collapsed .hot-list,
+#inven-hot-widget.collapsed .hot-footer,
+#inven-hot-widget.collapsed .hot-loading,
+#inven-hot-widget.collapsed .hot-error {
+  display: none !important;
 }
 
-#inven-hot-widget .hot-item:nth-child(1) { animation-delay: 0.05s; }
-#inven-hot-widget .hot-item:nth-child(2) { animation-delay: 0.1s; }
-#inven-hot-widget .hot-item:nth-child(3) { animation-delay: 0.15s; }
-
-@keyframes fadeInItem {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
+#inven-hot-widget .hot-header .hot-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
